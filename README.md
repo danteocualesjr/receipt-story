@@ -2,6 +2,8 @@
 
 Turn a receipt photo into a one-line memory — hackathon MVP.
 
+Dark journal UI · drag-and-drop upload · demo mode without an API key.
+
 ## Run locally
 
 ```bash
