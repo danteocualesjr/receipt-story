@@ -2,7 +2,7 @@
 
 import { MemoryCard } from "@/app/components/MemoryCard";
 import type { MemoryStory } from "@/lib/types";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -11,6 +11,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const processFile = useCallback(async (file: File) => {
     setError(null);
@@ -26,11 +33,7 @@ export default function Home() {
     try {
       const body = new FormData();
       body.append("receipt", file);
-
-      const res = await fetch("/api/story", {
-        method: "POST",
-        body,
-      });
+      const res = await fetch("/api/story", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
       setStory(data as MemoryStory);
@@ -72,46 +75,43 @@ export default function Home() {
     if (!story) return;
     const text = `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
     await navigator.clipboard.writeText(text);
+    setToast("Story copied");
   };
 
+  const dropzoneClass = [
+    "dropzone",
+    dragOver ? "dropzone--active" : "",
+    loading ? "dropzone--loading" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        padding: "2.5rem 1.25rem 4rem",
-        maxWidth: 520,
-        margin: "0 auto",
-      }}
-    >
-      <header style={{ marginBottom: "2rem" }}>
-        <p
-          style={{
-            margin: 0,
-            fontSize: "0.8rem",
-            textTransform: "uppercase",
-            letterSpacing: "0.12em",
-            color: "var(--muted)",
-          }}
-        >
-          Hackathon MVP
+    <main className="page">
+      <header className="header">
+        <span className="badge">✦ Receipt → Story</span>
+        <h1 className="title">Every receipt has a story.</h1>
+        <p className="subtitle">
+          Upload a photo. Get a one-line memory you&apos;ll actually want to keep.
         </p>
-        <h1
-          style={{
-            margin: "0.35rem 0 0",
-            fontFamily: "var(--font-serif)",
-            fontSize: "2.25rem",
-            fontWeight: 500,
-            lineHeight: 1.15,
-          }}
-        >
-          Receipt → Story
-        </h1>
-        <p style={{ margin: "0.75rem 0 0", color: "var(--muted)", lineHeight: 1.5 }}>
-          Snap a receipt. Get a one-line memory worth keeping.
-        </p>
+        <div className="steps">
+          <div className="step">
+            <strong>1. Snap</strong>
+            Photo of any receipt
+          </div>
+          <div className="step">
+            <strong>2. Read</strong>
+            AI finds the moment
+          </div>
+          <div className="step">
+            <strong>3. Keep</strong>
+            Copy & share the story
+          </div>
+        </div>
       </header>
 
       <section
+        className={dropzoneClass}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -120,16 +120,7 @@ export default function Home() {
         onDrop={(e) => {
           e.preventDefault();
           setDragOver(false);
-          const file = e.dataTransfer.files[0];
-          onFile(file ?? null);
-        }}
-        style={{
-          border: `2px dashed ${dragOver ? "var(--accent)" : "var(--border)"}`,
-          borderRadius: 16,
-          padding: "2rem 1.25rem",
-          textAlign: "center",
-          background: dragOver ? "var(--accent-soft)" : "rgba(255,253,248,0.6)",
-          transition: "border-color 0.15s, background 0.15s",
+          onFile(e.dataTransfer.files[0] ?? null);
         }}
       >
         <input
@@ -140,107 +131,84 @@ export default function Home() {
           hidden
           onChange={(e) => onFile(e.target.files?.[0] ?? null)}
         />
-        <p style={{ margin: "0 0 1rem", fontSize: "2rem" }} aria-hidden>
-          🧾
+        <p className="dropzone__icon" aria-hidden>
+          {loading ? "⏳" : "🧾"}
         </p>
-        <p style={{ margin: "0 0 1rem", color: "var(--muted)" }}>
-          Drop a receipt photo, or
+        <p className="dropzone__label">
+          {loading ? "Reading your receipt…" : "Drop a receipt here, or choose a photo"}
         </p>
         <button
           type="button"
+          className="btn btn--primary"
           onClick={() => inputRef.current?.click()}
           disabled={loading}
-          style={{
-            background: "var(--ink)",
-            color: "#fff",
-            border: "none",
-            borderRadius: 999,
-            padding: "0.65rem 1.35rem",
-            fontWeight: 600,
-          }}
         >
-          {loading ? "Reading receipt…" : "Choose photo"}
+          {loading ? (
+            <>
+              <span className="spinner" aria-hidden />
+              Processing
+            </>
+          ) : (
+            "Choose photo"
+          )}
         </button>
-        <p style={{ margin: "1rem 0 0", fontSize: "0.85rem" }}>
+        <p className="demo-hint">
           <button
             type="button"
-            onClick={tryDemo}
+            className="link-btn"
+            onClick={() => void tryDemo()}
             disabled={loading}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--accent)",
-              textDecoration: "underline",
-              padding: 0,
-            }}
           >
             Try demo story
           </button>
-          {" "}
-          (no API key needed)
+          {" · no API key needed"}
         </p>
       </section>
 
       {error ? (
-        <p
-          role="alert"
-          style={{
-            marginTop: "1rem",
-            padding: "0.75rem 1rem",
-            background: "#fef2f2",
-            color: "#b91c1c",
-            borderRadius: 8,
-            fontSize: "0.9rem",
-          }}
-        >
+        <p className="alert" role="alert">
           {error}
         </p>
       ) : null}
 
+      {loading && !story ? (
+        <div className="skeleton-wrap" aria-busy="true" aria-label="Creating your memory">
+          <div className="skeleton-card">
+            <div className="skeleton-line skeleton-line--short" />
+            <div className="skeleton-line" />
+            <div className="skeleton-line skeleton-line--story" />
+            <div className="skeleton-line skeleton-line--short" />
+          </div>
+        </div>
+      ) : null}
+
       {story ? (
-        <section style={{ marginTop: "2rem" }}>
+        <section className="card-wrap" key={story.storyLine}>
           <MemoryCard story={story} previewUrl={previewUrl} />
-          <div
-            style={{
-              display: "flex",
-              gap: "0.75rem",
-              marginTop: "1rem",
-              flexWrap: "wrap",
-            }}
-          >
+          <div className="actions">
             <button
               type="button"
+              className="btn btn--ghost"
               onClick={() => void copyStory()}
-              style={{
-                flex: 1,
-                minWidth: 140,
-                padding: "0.6rem 1rem",
-                borderRadius: 999,
-                border: "1px solid var(--border)",
-                background: "var(--bg-card)",
-              }}
             >
               Copy story
             </button>
             <button
               type="button"
+              className="btn btn--soft"
               onClick={() => inputRef.current?.click()}
-              style={{
-                flex: 1,
-                minWidth: 140,
-                padding: "0.6rem 1rem",
-                borderRadius: 999,
-                border: "none",
-                background: "var(--accent-soft)",
-                color: "var(--accent)",
-                fontWeight: 600,
-              }}
             >
               Another receipt
             </button>
           </div>
         </section>
       ) : null}
+
+      <p className="footer-note">
+        Built for hackathon demos · Powered by vision AI
+      </p>
+
+      {toast ? <div className="toast" role="status">{toast}</div> : null}
     </main>
   );
 }
