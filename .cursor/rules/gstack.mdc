@@ -1,0 +1,27 @@
+---
+description: Use gstack skills for AI-assisted product and engineering workflows
+alwaysApply: true
+---
+
+# gstack
+
+This project uses [gstack](https://github.com/garrytan/gstack) for structured AI workflows. Global install: `~/.cursor/skills/gstack`.
+
+## Web browsing
+
+Use the **/browse** skill from gstack for all web browsing and browser automation. Do not use Chrome MCP tools (`mcp__claude-in-chrome__*` or similar).
+
+## When to use gstack
+
+- **New idea or feature** → `/office-hours`, then `/plan-ceo-review` or `/autoplan`
+- **Before building** → `/plan-eng-review`, `/plan-design-review` as appropriate
+- **After code changes** → `/review`
+- **Test a URL** → `/qa <url>`
+- **Ship a PR** → `/ship`
+- **Upgrade gstack** → `/gstack-upgrade`
+
+## Available skills (short names)
+
+`/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/plan-devex-review`, `/design-consultation`, `/design-shotgun`, `/design-html`, `/review`, `/ship`, `/land-and-deploy`, `/canary`, `/benchmark`, `/browse`, `/open-gstack-browser`, `/qa`, `/qa-only`, `/design-review`, `/setup-browser-cookies`, `/setup-deploy`, `/setup-gbrain`, `/sync-gbrain`, `/retro`, `/investigate`, `/document-release`, `/document-generate`, `/codex`, `/cso`, `/autoplan`, `/pair-agent`, `/careful`, `/freeze`, `/guard`, `/unfreeze`, `/gstack-upgrade`, `/learn`
+
+When a gstack skill applies, invoke it rather than improvising the same workflow from scratch.
