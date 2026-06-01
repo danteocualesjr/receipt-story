@@ -224,7 +224,12 @@ export default function Home() {
       ) : null}
 
       {story ? (
-        <section className="card-wrap" key={story.storyLine}>
+        <section
+          className="card-wrap"
+          key={story.storyLine}
+          aria-live="polite"
+          aria-label="Generated memory story"
+        >
           <MemoryCard story={story} previewUrl={previewUrl} />
           <div className="actions">
             <button
