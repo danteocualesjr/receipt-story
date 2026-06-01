@@ -17,6 +17,16 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "Receipt → Story",
   description: "Turn a receipt into a one-line memory",
+  openGraph: {
+    title: "Receipt → Story",
+    description: "Upload a receipt photo and turn it into a memory worth keeping.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Receipt → Story",
+    description: "Upload a receipt photo and turn it into a memory worth keeping.",
+  },
 };
 
 export const viewport: Viewport = {

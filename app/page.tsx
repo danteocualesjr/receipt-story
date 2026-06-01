@@ -2,7 +2,10 @@
 
 import { MemoryCard } from "@/app/components/MemoryCard";
 import type { MemoryStory } from "@/lib/types";
+import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -12,6 +15,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!toast) return;
@@ -21,6 +25,7 @@ export default function Home() {
 
   const processFile = useCallback(async (file: File) => {
     setError(null);
+    setCopied(false);
     setLoading(true);
     setStory(null);
 
@@ -46,11 +51,41 @@ export default function Home() {
 
   const onFile = (file: File | null) => {
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Choose an image file, like a JPEG, PNG, or WebP receipt.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError("Choose an image under 8 MB so it can be processed quickly.");
+      return;
+    }
     void processFile(file);
+  };
+
+  const openFilePicker = () => inputRef.current?.click();
+
+  const chooseAnotherReceipt = () => {
+    setError(null);
+    setCopied(false);
+    setStory(null);
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    openFilePicker();
+  };
+
+  const onDropzoneKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget || loading) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openFilePicker();
+    }
   };
 
   const tryDemo = async () => {
     setError(null);
+    setCopied(false);
     setLoading(true);
     setStory(null);
     setPreviewUrl((prev) => {
@@ -75,7 +110,9 @@ export default function Home() {
     if (!story) return;
     const text = `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
     await navigator.clipboard.writeText(text);
+    setCopied(true);
     setToast("Story copied");
+    window.setTimeout(() => setCopied(false), 2000);
   };
 
   const dropzoneClass = [
@@ -112,6 +149,11 @@ export default function Home() {
 
       <section
         className={dropzoneClass}
+        role="group"
+        tabIndex={loading ? -1 : 0}
+        aria-label="Upload a receipt photo"
+        aria-disabled={loading}
+        onKeyDown={onDropzoneKeyDown}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -140,7 +182,7 @@ export default function Home() {
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => inputRef.current?.click()}
+          onClick={openFilePicker}
           disabled={loading}
         >
           {loading ? (
@@ -183,7 +225,12 @@ export default function Home() {
       ) : null}
 
       {story ? (
-        <section className="card-wrap" key={story.storyLine}>
+        <section
+          className="card-wrap"
+          key={story.storyLine}
+          aria-live="polite"
+          aria-label="Generated memory story"
+        >
           <MemoryCard story={story} previewUrl={previewUrl} />
           <div className="actions">
             <button
@@ -191,12 +238,12 @@ export default function Home() {
               className="btn btn--ghost"
               onClick={() => void copyStory()}
             >
-              Copy story
+              {copied ? "Copied!" : "Copy story"}
             </button>
             <button
               type="button"
               className="btn btn--soft"
-              onClick={() => inputRef.current?.click()}
+              onClick={chooseAnotherReceipt}
             >
               Another receipt
             </button>

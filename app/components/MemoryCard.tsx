@@ -17,7 +17,12 @@ export function MemoryCard({ story, previewUrl }: Props) {
           alt="Receipt"
           className="memory-card__image"
         />
-      ) : null}
+      ) : (
+        <div className="memory-card__placeholder" aria-hidden>
+          <span>{story.emoji}</span>
+          <small>Demo receipt</small>
+        </div>
+      )}
       <div className="memory-card__body">
         <div className="memory-card__meta">
           <span className="memory-card__emoji" aria-hidden>
