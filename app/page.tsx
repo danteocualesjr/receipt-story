@@ -15,6 +15,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!toast) return;
@@ -96,7 +97,9 @@ export default function Home() {
     if (!story) return;
     const text = `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
     await navigator.clipboard.writeText(text);
+    setCopied(true);
     setToast("Story copied");
+    window.setTimeout(() => setCopied(false), 2000);
   };
 
   const dropzoneClass = [
@@ -217,7 +220,7 @@ export default function Home() {
               className="btn btn--ghost"
               onClick={() => void copyStory()}
             >
-              Copy story
+              {copied ? "Copied!" : "Copy story"}
             </button>
             <button
               type="button"
