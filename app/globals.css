@@ -142,6 +142,18 @@ a {
   animation: fadeUp 0.6s var(--ease-out) 0.1s both;
 }
 
+.dropzone:hover,
+.dropzone:focus-visible {
+  border-color: rgba(232, 165, 75, 0.55);
+  background: rgba(232, 165, 75, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+}
+
+.dropzone:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .dropzone--active {
   border-color: var(--accent);
   background: var(--accent-soft);
