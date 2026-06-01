@@ -25,6 +25,7 @@ export default function Home() {
 
   const processFile = useCallback(async (file: File) => {
     setError(null);
+    setCopied(false);
     setLoading(true);
     setStory(null);
 
@@ -62,6 +63,17 @@ export default function Home() {
   };
 
   const openFilePicker = () => inputRef.current?.click();
+
+  const chooseAnotherReceipt = () => {
+    setError(null);
+    setCopied(false);
+    setStory(null);
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    openFilePicker();
+  };
 
   const onDropzoneKeyDown = (e: KeyboardEvent<HTMLElement>) => {
     if (e.target !== e.currentTarget || loading) return;
@@ -225,7 +237,7 @@ export default function Home() {
             <button
               type="button"
               className="btn btn--soft"
-              onClick={openFilePicker}
+              onClick={chooseAnotherReceipt}
             >
               Another receipt
             </button>
