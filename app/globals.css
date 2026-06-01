@@ -279,6 +279,35 @@ a {
   filter: saturate(0.85) contrast(1.05);
 }
 
+.memory-card__placeholder {
+  display: grid;
+  place-items: center;
+  height: 160px;
+  gap: 0.35rem;
+  color: var(--ink-soft);
+  background:
+    linear-gradient(135deg, rgba(232, 165, 75, 0.18), rgba(250, 246, 240, 0.04)),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 14px,
+      rgba(250, 246, 240, 0.04) 14px,
+      rgba(250, 246, 240, 0.04) 15px
+    );
+}
+
+.memory-card__placeholder span {
+  font-size: 2.75rem;
+}
+
+.memory-card__placeholder small {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
 .memory-card__body {
   position: relative;
   padding: 1.5rem 1.5rem 1.35rem;
