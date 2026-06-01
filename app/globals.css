@@ -403,7 +403,7 @@ a {
 /* Toast */
 .toast {
   position: fixed;
-  bottom: 1.5rem;
+  bottom: max(1.5rem, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%) translateY(0);
   padding: 0.65rem 1.25rem;
