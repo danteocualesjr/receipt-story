@@ -2,6 +2,7 @@
 
 import { MemoryCard } from "@/app/components/MemoryCard";
 import type { MemoryStory } from "@/lib/types";
+import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function Home() {
@@ -47,6 +48,16 @@ export default function Home() {
   const onFile = (file: File | null) => {
     if (!file) return;
     void processFile(file);
+  };
+
+  const openFilePicker = () => inputRef.current?.click();
+
+  const onDropzoneKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget || loading) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openFilePicker();
+    }
   };
 
   const tryDemo = async () => {
@@ -112,6 +123,11 @@ export default function Home() {
 
       <section
         className={dropzoneClass}
+        role="button"
+        tabIndex={loading ? -1 : 0}
+        aria-label="Upload a receipt photo"
+        aria-disabled={loading}
+        onKeyDown={onDropzoneKeyDown}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -140,7 +156,7 @@ export default function Home() {
         <button
           type="button"
           className="btn btn--primary"
-          onClick={() => inputRef.current?.click()}
+          onClick={openFilePicker}
           disabled={loading}
         >
           {loading ? (
@@ -196,7 +212,7 @@ export default function Home() {
             <button
               type="button"
               className="btn btn--soft"
-              onClick={() => inputRef.current?.click()}
+              onClick={openFilePicker}
             >
               Another receipt
             </button>
