@@ -5,6 +5,8 @@ import type { MemoryStory } from "@/lib/types";
 import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [story, setStory] = useState<MemoryStory | null>(null);
@@ -47,6 +49,14 @@ export default function Home() {
 
   const onFile = (file: File | null) => {
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Choose an image file, like a JPEG, PNG, or WebP receipt.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError("Choose an image under 8 MB so it can be processed quickly.");
+      return;
+    }
     void processFile(file);
   };
 
