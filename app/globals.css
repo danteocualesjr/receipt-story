@@ -534,3 +534,30 @@ a {
     padding: 3rem 1.5rem 5rem;
   }
 }
+
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .header,
+  .dropzone,
+  .card-wrap,
+  .alert,
+  .footer-note,
+  .skeleton-wrap,
+  .toast,
+  .spinner,
+  .skeleton-line {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .dropzone,
+  .btn {
+    transition-duration: 0.01ms !important;
+  }
+}
