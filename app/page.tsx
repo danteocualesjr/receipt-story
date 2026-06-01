@@ -85,6 +85,7 @@ export default function Home() {
 
   const tryDemo = async () => {
     setError(null);
+    setCopied(false);
     setLoading(true);
     setStory(null);
     setPreviewUrl((prev) => {
@@ -148,7 +149,7 @@ export default function Home() {
 
       <section
         className={dropzoneClass}
-        role="button"
+        role="group"
         tabIndex={loading ? -1 : 0}
         aria-label="Upload a receipt photo"
         aria-disabled={loading}
