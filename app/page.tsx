@@ -6,6 +6,35 @@ import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const THEME_STORAGE_KEY = "receipt-story-theme";
+const DEFAULT_THEME = "dark";
+
+type Theme = "light" | "dark";
+
+function applyTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", theme === "dark" ? "#0f0e0c" : "#fbf7ef");
+}
+
+function getStoredTheme(): Theme {
+  try {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return storedTheme === "light" || storedTheme === "dark" ? storedTheme : DEFAULT_THEME;
+  } catch {
+    return DEFAULT_THEME;
+  }
+}
+
+function storeTheme(theme: Theme) {
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    // Theme switching should still work for the current session if storage is unavailable.
+  }
+}
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -16,12 +45,28 @@ export default function Home() {
   const [dragOver, setDragOver] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
 
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 2200);
     return () => clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    const nextTheme = getStoredTheme();
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme((current) => {
+      const nextTheme = current === "dark" ? "light" : "dark";
+      storeTheme(nextTheme);
+      applyTheme(nextTheme);
+      return nextTheme;
+    });
+  };
 
   const processFile = useCallback(async (file: File) => {
     setError(null);
@@ -126,7 +171,19 @@ export default function Home() {
   return (
     <main className="page">
       <header className="header">
-        <span className="badge">✦ Receipt → Story</span>
+        <div className="header__top">
+          <span className="badge">✦ Receipt → Story</span>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-pressed={theme === "dark"}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            <span aria-hidden>{theme === "dark" ? "☀️" : "🌙"}</span>
+            {theme === "dark" ? "Light mode" : "Dark mode"}
+          </button>
+        </div>
         <h1 className="title">Every receipt has a story.</h1>
         <p className="subtitle">
           Upload a photo. Get a one-line memory you&apos;ll actually want to keep.

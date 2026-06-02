@@ -1,4 +1,45 @@
 :root {
+  color-scheme: light;
+  --bg: #fbf7ef;
+  --bg-elevated: #fffaf3;
+  --bg-card: #fffdf8;
+  --bg-card-hover: #f4eadb;
+  --ink: #1f1a14;
+  --ink-soft: #5d5348;
+  --muted: #8a7a68;
+  --accent: #b96f12;
+  --accent-hover: #8f500b;
+  --accent-glow: rgba(185, 111, 18, 0.24);
+  --accent-soft: rgba(185, 111, 18, 0.1);
+  --accent-border: rgba(185, 111, 18, 0.22);
+  --accent-border-strong: rgba(185, 111, 18, 0.46);
+  --accent-contrast: #1f1a14;
+  --border: rgba(31, 26, 20, 0.1);
+  --border-strong: rgba(31, 26, 20, 0.16);
+  --shadow: 0 32px 64px rgba(82, 57, 27, 0.18);
+  --shadow-card: 0 24px 48px rgba(82, 57, 27, 0.14);
+  --body-glow: rgba(232, 165, 75, 0.24);
+  --body-wash: rgba(185, 111, 18, 0.1);
+  --dropzone-hover-bg: rgba(185, 111, 18, 0.08);
+  --dropzone-hover-shadow: 0 18px 40px rgba(82, 57, 27, 0.16);
+  --primary-bg: linear-gradient(135deg, #f2bf68, #d98320);
+  --spinner-track: rgba(31, 26, 20, 0.25);
+  --placeholder-start: rgba(232, 165, 75, 0.24);
+  --placeholder-end: rgba(31, 26, 20, 0.04);
+  --placeholder-stripe: rgba(31, 26, 20, 0.06);
+  --skeleton-highlight: rgba(31, 26, 20, 0.08);
+  --danger-ink: #991b1b;
+  --danger-bg: rgba(220, 38, 38, 0.1);
+  --danger-border: rgba(185, 28, 28, 0.22);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --font-serif: var(--font-fraunces), "Iowan Old Style", Georgia, serif;
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
   --bg: #0f0e0c;
   --bg-elevated: #1a1814;
   --bg-card: #232019;
@@ -7,17 +48,29 @@
   --ink-soft: #d6cfc4;
   --muted: #8a8278;
   --accent: #e8a54b;
+  --accent-hover: #f0b85c;
   --accent-glow: rgba(232, 165, 75, 0.35);
   --accent-soft: rgba(232, 165, 75, 0.12);
+  --accent-border: rgba(232, 165, 75, 0.25);
+  --accent-border-strong: rgba(232, 165, 75, 0.55);
+  --accent-contrast: #0f0e0c;
   --border: rgba(250, 246, 240, 0.08);
   --border-strong: rgba(250, 246, 240, 0.14);
   --shadow: 0 32px 64px rgba(0, 0, 0, 0.45);
   --shadow-card: 0 24px 48px rgba(0, 0, 0, 0.35);
-  --radius: 20px;
-  --radius-sm: 12px;
-  --font-serif: var(--font-fraunces), "Iowan Old Style", Georgia, serif;
-  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --body-glow: rgba(232, 165, 75, 0.15);
+  --body-wash: rgba(120, 90, 50, 0.08);
+  --dropzone-hover-bg: rgba(232, 165, 75, 0.08);
+  --dropzone-hover-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+  --primary-bg: linear-gradient(135deg, #f0b85c, var(--accent));
+  --spinner-track: rgba(15, 14, 12, 0.25);
+  --placeholder-start: rgba(232, 165, 75, 0.18);
+  --placeholder-end: rgba(250, 246, 240, 0.04);
+  --placeholder-stripe: rgba(250, 246, 240, 0.04);
+  --skeleton-highlight: rgba(250, 246, 240, 0.08);
+  --danger-ink: #fecaca;
+  --danger-bg: rgba(185, 28, 28, 0.15);
+  --danger-border: rgba(248, 113, 113, 0.25);
 }
 
 * {
@@ -36,8 +89,8 @@ body {
 
 body {
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 165, 75, 0.15), transparent),
-    radial-gradient(circle at 100% 100%, rgba(120, 90, 50, 0.08), transparent 40%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--body-glow), transparent),
+    radial-gradient(circle at 100% 100%, var(--body-wash), transparent 40%);
 }
 
 button {
@@ -67,11 +120,19 @@ a {
   animation: fadeUp 0.6s var(--ease-out) both;
 }
 
+.header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin: 0 0 0.75rem;
+  margin: 0;
   padding: 0.35rem 0.75rem;
   font-size: 0.7rem;
   font-weight: 600;
@@ -79,8 +140,37 @@ a {
   text-transform: uppercase;
   color: var(--accent);
   background: var(--accent-soft);
-  border: 1px solid rgba(232, 165, 75, 0.25);
+  border: 1px solid var(--accent-border);
   border-radius: 999px;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding: 0.35rem 0.65rem;
+  color: var(--ink-soft);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition:
+    background 0.15s var(--ease-out),
+    border-color 0.15s var(--ease-out),
+    color 0.15s var(--ease-out),
+    transform 0.15s var(--ease-out);
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
+  background: var(--bg-card-hover);
+  border-color: var(--accent-border);
+}
+
+.theme-toggle:active {
+  transform: scale(0.98);
 }
 
 .title {
@@ -144,9 +234,9 @@ a {
 
 .dropzone:hover,
 .dropzone:focus-visible {
-  border-color: rgba(232, 165, 75, 0.55);
-  background: rgba(232, 165, 75, 0.08);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+  border-color: var(--accent-border-strong);
+  background: var(--dropzone-hover-bg);
+  box-shadow: var(--dropzone-hover-shadow);
 }
 
 .dropzone:focus-visible {
@@ -198,8 +288,8 @@ a {
 }
 
 .btn--primary {
-  color: var(--bg);
-  background: linear-gradient(135deg, #f0b85c, var(--accent));
+  color: var(--accent-contrast);
+  background: var(--primary-bg);
   box-shadow: 0 8px 24px var(--accent-glow);
 }
 
@@ -221,7 +311,7 @@ a {
 .btn--soft {
   color: var(--accent);
   background: var(--accent-soft);
-  border: 1px solid rgba(232, 165, 75, 0.2);
+  border: 1px solid var(--accent-border);
 }
 
 .link-btn {
@@ -235,7 +325,7 @@ a {
 }
 
 .link-btn:hover:not(:disabled) {
-  color: #f0b85c;
+  color: var(--accent-hover);
 }
 
 .demo-hint {
@@ -248,8 +338,8 @@ a {
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(15, 14, 12, 0.25);
-  border-top-color: var(--bg);
+  border: 2px solid var(--spinner-track);
+  border-top-color: var(--accent-contrast);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -298,13 +388,13 @@ a {
   gap: 0.35rem;
   color: var(--ink-soft);
   background:
-    linear-gradient(135deg, rgba(232, 165, 75, 0.18), rgba(250, 246, 240, 0.04)),
+    linear-gradient(135deg, var(--placeholder-start), var(--placeholder-end)),
     repeating-linear-gradient(
       90deg,
       transparent 0,
       transparent 14px,
-      rgba(250, 246, 240, 0.04) 14px,
-      rgba(250, 246, 240, 0.04) 15px
+      var(--placeholder-stripe) 14px,
+      var(--placeholder-stripe) 15px
     );
 }
 
@@ -422,9 +512,9 @@ a {
   margin-top: 1rem;
   padding: 0.85rem 1rem;
   font-size: 0.9rem;
-  color: #fecaca;
-  background: rgba(185, 28, 28, 0.15);
-  border: 1px solid rgba(248, 113, 113, 0.25);
+  color: var(--danger-ink);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
   border-radius: var(--radius-sm);
   animation: fadeUp 0.3s var(--ease-out) both;
 }
@@ -487,7 +577,7 @@ a {
   background: linear-gradient(
     90deg,
     var(--bg-elevated) 0%,
-    rgba(250, 246, 240, 0.08) 50%,
+    var(--skeleton-highlight) 50%,
     var(--bg-elevated) 100%
   );
   background-size: 200% 100%;
@@ -524,7 +614,8 @@ a {
 }
 
 .btn:focus-visible,
-.link-btn:focus-visible {
+.link-btn:focus-visible,
+.theme-toggle:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
@@ -557,7 +648,8 @@ a {
   }
 
   .dropzone,
-  .btn {
+  .btn,
+  .theme-toggle {
     transition-duration: 0.01ms !important;
   }
 }
