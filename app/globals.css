@@ -442,9 +442,41 @@ a {
   pointer-events: none;
 }
 
+.memory-card__media {
+  position: relative;
+  isolation: isolate;
+}
+
+.memory-card__media::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 52px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.24));
+  pointer-events: none;
+}
+
+.memory-card__ribbon {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  z-index: 2;
+  padding: 0.38rem 0.65rem;
+  color: var(--accent-contrast);
+  background: var(--primary-bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .memory-card__image {
+  display: block;
   width: 100%;
-  height: 160px;
+  height: 180px;
   object-fit: cover;
   filter: saturate(0.85) contrast(1.05);
 }
@@ -452,7 +484,7 @@ a {
 .memory-card__placeholder {
   display: grid;
   place-items: center;
-  height: 160px;
+  height: 180px;
   gap: 0.35rem;
   color: var(--ink-soft);
   background:

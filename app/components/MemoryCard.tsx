@@ -10,19 +10,24 @@ type Props = {
 export function MemoryCard({ story, previewUrl }: Props) {
   return (
     <article id="memory-card" className="memory-card">
-      {previewUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={previewUrl}
-          alt="Receipt"
-          className="memory-card__image"
-        />
-      ) : (
-        <div className="memory-card__placeholder" aria-hidden>
-          <span>{story.emoji}</span>
-          <small>Demo receipt</small>
-        </div>
-      )}
+      <div className="memory-card__media">
+        <span className="memory-card__ribbon">
+          {story.demo ? "Demo memory" : "Receipt captured"}
+        </span>
+        {previewUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={previewUrl}
+            alt="Receipt"
+            className="memory-card__image"
+          />
+        ) : (
+          <div className="memory-card__placeholder" aria-hidden>
+            <span>{story.emoji}</span>
+            <small>Demo receipt</small>
+          </div>
+        )}
+      </div>
       <div className="memory-card__body">
         <div className="memory-card__meta">
           <span className="memory-card__emoji" aria-hidden>
