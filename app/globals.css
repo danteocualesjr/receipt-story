@@ -784,6 +784,57 @@ a {
   }
 }
 
+@media (min-width: 820px) {
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.9fr);
+    grid-template-areas:
+      "header upload"
+      "feedback feedback"
+      "result result"
+      "footer footer";
+    gap: 1.5rem 2rem;
+    align-items: start;
+    max-width: 980px;
+    padding-top: 5rem;
+  }
+
+  .header {
+    grid-area: header;
+    margin-bottom: 0;
+    padding-top: 0.75rem;
+  }
+
+  .dropzone {
+    grid-area: upload;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .alert {
+    grid-area: feedback;
+  }
+
+  .skeleton-wrap,
+  .card-wrap {
+    grid-area: result;
+    width: min(100%, 640px);
+    justify-self: center;
+  }
+
+  .memory-card,
+  .skeleton-card,
+  .loading-steps {
+    max-width: 520px;
+  }
+
+  .footer-note {
+    grid-area: footer;
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   *,
