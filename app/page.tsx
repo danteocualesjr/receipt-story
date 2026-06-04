@@ -188,6 +188,20 @@ export default function Home() {
         <p className="subtitle">
           Upload a photo. Get a one-line memory you&apos;ll actually want to keep.
         </p>
+        <div className="hero-stats" aria-label="Product highlights">
+          <span>
+            <strong>Instant</strong>
+            Story draft
+          </span>
+          <span>
+            <strong>Camera-ready</strong>
+            Mobile upload
+          </span>
+          <span>
+            <strong>Demo-safe</strong>
+            Works offline
+          </span>
+        </div>
         <div className="steps">
           <div className="step">
             <strong>1. Snap</strong>

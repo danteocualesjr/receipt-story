@@ -189,6 +189,35 @@ a {
   font-size: 1.05rem;
 }
 
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.hero-stats span {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 24px rgba(82, 57, 27, 0.06);
+}
+
+.hero-stats strong {
+  color: var(--ink);
+  font-size: 0.74rem;
+  line-height: 1.1;
+}
+
+.hero-stats span {
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
 .steps {
   display: flex;
   gap: 0.5rem;
