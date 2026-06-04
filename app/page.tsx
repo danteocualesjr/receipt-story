@@ -250,6 +250,7 @@ export default function Home() {
         <p className="dropzone__label">
           {loading ? "Reading your receipt…" : "Drop a receipt here, or choose a photo"}
         </p>
+        <p className="dropzone__support">JPEG, PNG, or WebP under 8 MB</p>
         <button
           type="button"
           className="btn btn--primary"
@@ -276,6 +277,11 @@ export default function Home() {
           </button>
           {" · no API key needed"}
         </p>
+        <div className="dropzone__pills" aria-label="Upload notes">
+          <span>No signup</span>
+          <span>Camera upload</span>
+          <span>Demo fallback</span>
+        </div>
       </section>
 
       {error ? (

@@ -248,6 +248,7 @@ a {
 /* Upload zone */
 .dropzone {
   position: relative;
+  overflow: hidden;
   padding: 2.25rem 1.5rem;
   text-align: center;
   border: 2px dashed var(--border-strong);
@@ -259,6 +260,20 @@ a {
     transform 0.2s var(--ease-out),
     box-shadow 0.2s var(--ease-out);
   animation: fadeUp 0.6s var(--ease-out) 0.1s both;
+}
+
+.dropzone::before {
+  content: "";
+  position: absolute;
+  inset: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 8px);
+  pointer-events: none;
+}
+
+.dropzone > * {
+  position: relative;
+  z-index: 1;
 }
 
 .dropzone:hover,
@@ -294,6 +309,12 @@ a {
   margin: 0 0 1.25rem;
   color: var(--ink-soft);
   font-size: 0.95rem;
+}
+
+.dropzone__support {
+  margin: -0.75rem 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .btn {
@@ -361,6 +382,24 @@ a {
   margin: 1rem 0 0;
   font-size: 0.82rem;
   color: var(--muted);
+}
+
+.dropzone__pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.dropzone__pills span {
+  padding: 0.32rem 0.55rem;
+  color: var(--ink-soft);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 
 /* Spinner */
