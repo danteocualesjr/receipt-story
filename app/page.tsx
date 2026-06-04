@@ -263,7 +263,12 @@ export default function Home() {
               Processing
             </>
           ) : (
-            "Choose photo"
+            <>
+              <span className="btn__icon" aria-hidden>
+                📷
+              </span>
+              Choose photo
+            </>
           )}
         </button>
         <p className="demo-hint">
@@ -320,6 +325,9 @@ export default function Home() {
               className="btn btn--ghost"
               onClick={() => void copyStory()}
             >
+              <span className="btn__icon" aria-hidden>
+                {copied ? "✓" : "⧉"}
+              </span>
               {copied ? "Copied!" : "Copy story"}
             </button>
             <button
@@ -327,6 +335,9 @@ export default function Home() {
               className="btn btn--soft"
               onClick={chooseAnotherReceipt}
             >
+              <span className="btn__icon" aria-hidden>
+                ↻
+              </span>
               Another receipt
             </button>
           </div>
