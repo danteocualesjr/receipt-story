@@ -298,6 +298,11 @@ export default function Home() {
             <div className="skeleton-line skeleton-line--story" />
             <div className="skeleton-line skeleton-line--short" />
           </div>
+          <ol className="loading-steps" aria-hidden>
+            <li>Reading merchant</li>
+            <li>Finding the moment</li>
+            <li>Writing keepsake</li>
+          </ol>
         </div>
       ) : null}
 
