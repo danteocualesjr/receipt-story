@@ -344,9 +344,10 @@ export default function Home() {
         </section>
       ) : null}
 
-      <p className="footer-note">
-        Built for hackathon demos · Powered by vision AI
-      </p>
+      <footer className="footer-note">
+        <span>Built for hackathon demos</span>
+        <span>Powered by vision AI</span>
+      </footer>
 
       {toast ? <div className="toast" role="status">{toast}</div> : null}
     </main>

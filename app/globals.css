@@ -245,6 +245,11 @@ a {
   margin-bottom: 0.15rem;
 }
 
+.step:hover {
+  border-color: var(--accent-border);
+  background: var(--bg-card);
+}
+
 /* Upload zone */
 .dropzone {
   position: relative;
@@ -339,6 +344,10 @@ a {
   width: 1.25rem;
   height: 1.25rem;
   line-height: 1;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .btn:active:not(:disabled) {
@@ -632,11 +641,22 @@ a {
 }
 
 .footer-note {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
   margin-top: 3rem;
   text-align: center;
   font-size: 0.75rem;
   color: var(--muted);
   animation: fadeUp 0.6s var(--ease-out) 0.2s both;
+}
+
+.footer-note span {
+  padding: 0.35rem 0.65rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 999px;
 }
 
 @keyframes fadeUp {
@@ -851,7 +871,8 @@ a {
   .skeleton-wrap,
   .toast,
   .spinner,
-  .skeleton-line {
+  .skeleton-line,
+  .loading-steps li::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
