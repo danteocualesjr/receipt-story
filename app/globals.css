@@ -189,6 +189,35 @@ a {
   font-size: 1.05rem;
 }
 
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.hero-stats span {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 10px 24px rgba(82, 57, 27, 0.06);
+}
+
+.hero-stats strong {
+  color: var(--ink);
+  font-size: 0.74rem;
+  line-height: 1.1;
+}
+
+.hero-stats span {
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
 .steps {
   display: flex;
   gap: 0.5rem;
@@ -216,9 +245,15 @@ a {
   margin-bottom: 0.15rem;
 }
 
+.step:hover {
+  border-color: var(--accent-border);
+  background: var(--bg-card);
+}
+
 /* Upload zone */
 .dropzone {
   position: relative;
+  overflow: hidden;
   padding: 2.25rem 1.5rem;
   text-align: center;
   border: 2px dashed var(--border-strong);
@@ -230,6 +265,20 @@ a {
     transform 0.2s var(--ease-out),
     box-shadow 0.2s var(--ease-out);
   animation: fadeUp 0.6s var(--ease-out) 0.1s both;
+}
+
+.dropzone::before {
+  content: "";
+  position: absolute;
+  inset: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 8px);
+  pointer-events: none;
+}
+
+.dropzone > * {
+  position: relative;
+  z-index: 1;
 }
 
 .dropzone:hover,
@@ -267,6 +316,12 @@ a {
   font-size: 0.95rem;
 }
 
+.dropzone__support {
+  margin: -0.75rem 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -281,6 +336,18 @@ a {
     transform 0.15s var(--ease-out),
     box-shadow 0.15s var(--ease-out),
     background 0.15s;
+}
+
+.btn__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  line-height: 1;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .btn:active:not(:disabled) {
@@ -334,6 +401,24 @@ a {
   color: var(--muted);
 }
 
+.dropzone__pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.dropzone__pills span {
+  padding: 0.32rem 0.55rem;
+  color: var(--ink-soft);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
 /* Spinner */
 .spinner {
   width: 18px;
@@ -374,9 +459,41 @@ a {
   pointer-events: none;
 }
 
+.memory-card__media {
+  position: relative;
+  isolation: isolate;
+}
+
+.memory-card__media::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 52px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.24));
+  pointer-events: none;
+}
+
+.memory-card__ribbon {
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  z-index: 2;
+  padding: 0.38rem 0.65rem;
+  color: var(--accent-contrast);
+  background: var(--primary-bg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .memory-card__image {
+  display: block;
   width: 100%;
-  height: 160px;
+  height: 180px;
   object-fit: cover;
   filter: saturate(0.85) contrast(1.05);
 }
@@ -384,7 +501,7 @@ a {
 .memory-card__placeholder {
   display: grid;
   place-items: center;
-  height: 160px;
+  height: 180px;
   gap: 0.35rem;
   color: var(--ink-soft);
   background:
@@ -481,6 +598,10 @@ a {
   display: flex;
   gap: 0.65rem;
   margin-top: 1rem;
+  padding: 0.55rem;
+  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius-sm) + 8px);
 }
 
 .actions .btn {
@@ -520,11 +641,22 @@ a {
 }
 
 .footer-note {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
   margin-top: 3rem;
   text-align: center;
   font-size: 0.75rem;
   color: var(--muted);
   animation: fadeUp 0.6s var(--ease-out) 0.2s both;
+}
+
+.footer-note span {
+  padding: 0.35rem 0.65rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 999px;
 }
 
 @keyframes fadeUp {
@@ -570,6 +702,46 @@ a {
   border-radius: var(--radius);
 }
 
+.loading-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  max-width: 420px;
+  margin: 0.75rem auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.loading-steps li {
+  position: relative;
+  padding: 0.6rem 0.5rem;
+  overflow: hidden;
+  color: var(--muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.loading-steps li::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+  transform: translateX(-100%);
+  animation: scan 1.6s ease-in-out infinite;
+}
+
+.loading-steps li:nth-child(2)::after {
+  animation-delay: 0.2s;
+}
+
+.loading-steps li:nth-child(3)::after {
+  animation-delay: 0.4s;
+}
+
 .skeleton-line {
   height: 12px;
   margin-bottom: 0.75rem;
@@ -602,6 +774,12 @@ a {
   }
 }
 
+@keyframes scan {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 .memory-card__story::before {
   content: "\201C";
   display: block;
@@ -626,6 +804,57 @@ a {
   }
 }
 
+@media (min-width: 820px) {
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.9fr);
+    grid-template-areas:
+      "header upload"
+      "feedback feedback"
+      "result result"
+      "footer footer";
+    gap: 1.5rem 2rem;
+    align-items: start;
+    max-width: 980px;
+    padding-top: 5rem;
+  }
+
+  .header {
+    grid-area: header;
+    margin-bottom: 0;
+    padding-top: 0.75rem;
+  }
+
+  .dropzone {
+    grid-area: upload;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .alert {
+    grid-area: feedback;
+  }
+
+  .skeleton-wrap,
+  .card-wrap {
+    grid-area: result;
+    width: min(100%, 640px);
+    justify-self: center;
+  }
+
+  .memory-card,
+  .skeleton-card,
+  .loading-steps {
+    max-width: 520px;
+  }
+
+  .footer-note {
+    grid-area: footer;
+  }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -642,7 +871,8 @@ a {
   .skeleton-wrap,
   .toast,
   .spinner,
-  .skeleton-line {
+  .skeleton-line,
+  .loading-steps li::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }

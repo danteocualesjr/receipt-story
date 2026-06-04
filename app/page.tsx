@@ -188,6 +188,20 @@ export default function Home() {
         <p className="subtitle">
           Upload a photo. Get a one-line memory you&apos;ll actually want to keep.
         </p>
+        <div className="hero-stats" aria-label="Product highlights">
+          <span>
+            <strong>Instant</strong>
+            Story draft
+          </span>
+          <span>
+            <strong>Camera-ready</strong>
+            Mobile upload
+          </span>
+          <span>
+            <strong>Demo-safe</strong>
+            Works offline
+          </span>
+        </div>
         <div className="steps">
           <div className="step">
             <strong>1. Snap</strong>
@@ -236,6 +250,7 @@ export default function Home() {
         <p className="dropzone__label">
           {loading ? "Reading your receipt…" : "Drop a receipt here, or choose a photo"}
         </p>
+        <p className="dropzone__support">JPEG, PNG, or WebP under 8 MB</p>
         <button
           type="button"
           className="btn btn--primary"
@@ -248,7 +263,12 @@ export default function Home() {
               Processing
             </>
           ) : (
-            "Choose photo"
+            <>
+              <span className="btn__icon" aria-hidden>
+                📷
+              </span>
+              Choose photo
+            </>
           )}
         </button>
         <p className="demo-hint">
@@ -262,6 +282,11 @@ export default function Home() {
           </button>
           {" · no API key needed"}
         </p>
+        <div className="dropzone__pills" aria-label="Upload notes">
+          <span>No signup</span>
+          <span>Camera upload</span>
+          <span>Demo fallback</span>
+        </div>
       </section>
 
       {error ? (
@@ -278,6 +303,11 @@ export default function Home() {
             <div className="skeleton-line skeleton-line--story" />
             <div className="skeleton-line skeleton-line--short" />
           </div>
+          <ol className="loading-steps" aria-hidden>
+            <li>Reading merchant</li>
+            <li>Finding the moment</li>
+            <li>Writing keepsake</li>
+          </ol>
         </div>
       ) : null}
 
@@ -295,6 +325,9 @@ export default function Home() {
               className="btn btn--ghost"
               onClick={() => void copyStory()}
             >
+              <span className="btn__icon" aria-hidden>
+                {copied ? "✓" : "⧉"}
+              </span>
               {copied ? "Copied!" : "Copy story"}
             </button>
             <button
@@ -302,15 +335,19 @@ export default function Home() {
               className="btn btn--soft"
               onClick={chooseAnotherReceipt}
             >
+              <span className="btn__icon" aria-hidden>
+                ↻
+              </span>
               Another receipt
             </button>
           </div>
         </section>
       ) : null}
 
-      <p className="footer-note">
-        Built for hackathon demos · Powered by vision AI
-      </p>
+      <footer className="footer-note">
+        <span>Built for hackathon demos</span>
+        <span>Powered by vision AI</span>
+      </footer>
 
       {toast ? <div className="toast" role="status">{toast}</div> : null}
     </main>
