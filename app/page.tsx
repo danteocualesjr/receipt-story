@@ -553,6 +553,10 @@ export default function Home() {
           </p>
         ) : null}
         <p className="shortcut-hint">Shortcuts: press U to upload or D for demo</p>
+        <p className="privacy-note">
+          <span aria-hidden>🔒</span>
+          Photos are sent only to create this story and are not stored by the app.
+        </p>
       </section>
 
       {error ? (

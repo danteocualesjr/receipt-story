@@ -461,6 +461,20 @@ a {
   font-size: 0.72rem;
 }
 
+.privacy-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.85rem auto 0;
+  padding: 0.55rem 0.7rem;
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--bg-card) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
 /* Spinner */
 .spinner {
   width: 18px;
