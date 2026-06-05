@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Receipt Story">
+  <rect width="128" height="128" rx="28" fill="#0f0e0c"/>
+  <path d="M34 24h60v80l-8-5-8 5-8-5-8 5-8-5-8 5-12-7V24Z" fill="#fffaf3"/>
+  <path d="M46 42h36M46 58h28M46 74h36" stroke="#b96f12" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="89" cy="38" r="14" fill="#e8a54b"/>
+  <path d="M84 38l4 4 8-10" stroke="#0f0e0c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

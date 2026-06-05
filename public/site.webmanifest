@@ -1,0 +1,16 @@
+{
+  "name": "Receipt Story",
+  "short_name": "Receipt Story",
+  "description": "Turn a receipt photo into a one-line memory.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0e0c",
+  "theme_color": "#0f0e0c",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

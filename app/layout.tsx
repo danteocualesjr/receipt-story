@@ -32,6 +32,11 @@ const themeInitScript = `
 export const metadata: Metadata = {
   title: "Receipt → Story",
   description: "Turn a receipt into a one-line memory",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+  manifest: "/site.webmanifest",
   openGraph: {
     title: "Receipt → Story",
     description: "Upload a receipt photo and turn it into a memory worth keeping.",
