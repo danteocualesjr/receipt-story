@@ -684,7 +684,13 @@ a {
   font-weight: 500;
 }
 
-.memory-journal__header span {
+.memory-journal__tools {
+  display: grid;
+  justify-items: end;
+  gap: 0.25rem;
+}
+
+.memory-journal__tools span {
   color: var(--muted);
   font-size: 0.75rem;
   font-weight: 800;

@@ -345,6 +345,12 @@ export default function Home() {
     setToast("Memory restored");
   };
 
+  const clearHistory = () => {
+    setHistory([]);
+    storeHistory([]);
+    setToast("Journal cleared");
+  };
+
   const dropzoneClass = [
     "dropzone",
     dragOver ? "dropzone--active" : "",
@@ -593,7 +599,12 @@ export default function Home() {
               <p className="eyebrow">Recent journal</p>
               <h2>Saved in this browser</h2>
             </div>
-            <span>{history.length}/{HISTORY_LIMIT}</span>
+            <div className="memory-journal__tools">
+              <span>{history.length}/{HISTORY_LIMIT}</span>
+              <button type="button" className="link-btn" onClick={clearHistory}>
+                Clear
+              </button>
+            </div>
           </div>
           <div className="memory-journal__list">
             {history.map((memory) => (
