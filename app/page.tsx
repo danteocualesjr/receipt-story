@@ -109,6 +109,23 @@ export default function Home() {
     void processFile(file);
   };
 
+  useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      if (loading) return;
+      const image = Array.from(event.clipboardData?.files ?? []).find((file) =>
+        file.type.startsWith("image/"),
+      );
+      if (!image) return;
+
+      event.preventDefault();
+      setToast("Pasted receipt image");
+      onFile(image);
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [loading]);
+
   const retryLastUpload = () => {
     if (!lastFileRef.current || loading) return;
     void processFile(lastFileRef.current);
@@ -265,7 +282,9 @@ export default function Home() {
         <p className="dropzone__label">
           {loading ? "Reading your receipt…" : "Drop a receipt here, or choose a photo"}
         </p>
-        <p className="dropzone__support">JPEG, PNG, or WebP under 8 MB</p>
+        <p className="dropzone__support">
+          JPEG, PNG, or WebP under 8 MB · paste from clipboard supported
+        </p>
         <button
           type="button"
           className="btn btn--primary"
@@ -300,6 +319,7 @@ export default function Home() {
         <div className="dropzone__pills" aria-label="Upload notes">
           <span>No signup</span>
           <span>Camera upload</span>
+          <span>Paste image</span>
           <span>Demo fallback</span>
         </div>
       </section>
