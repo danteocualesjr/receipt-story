@@ -11,6 +11,10 @@ const DEFAULT_THEME = "dark";
 
 type Theme = "light" | "dark";
 
+function formatStoryText(story: MemoryStory) {
+  return `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
+}
+
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
@@ -185,11 +189,31 @@ export default function Home() {
 
   const copyStory = async () => {
     if (!story) return;
-    const text = `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(formatStoryText(story));
     setCopied(true);
     setToast("Story copied");
     window.setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareStory = async () => {
+    if (!story) return;
+    const text = formatStoryText(story);
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Receipt Story",
+          text,
+        });
+        setToast("Share sheet opened");
+        return;
+      }
+
+      await navigator.clipboard.writeText(text);
+      setToast("Story copied for sharing");
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
+      setError(e instanceof Error ? e.message : "Unable to share this story.");
+    }
   };
 
   const dropzoneClass = [
@@ -374,6 +398,16 @@ export default function Home() {
                 {copied ? "✓" : "⧉"}
               </span>
               {copied ? "Copied!" : "Copy story"}
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => void shareStory()}
+            >
+              <span className="btn__icon" aria-hidden>
+                ⇪
+              </span>
+              Share
             </button>
             <button
               type="button"
