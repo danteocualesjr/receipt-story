@@ -8,7 +8,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const THEME_STORAGE_KEY = "receipt-story-theme";
+const HISTORY_STORAGE_KEY = "receipt-story-history";
 const DEFAULT_THEME = "dark";
+const HISTORY_LIMIT = 5;
 const DEMO_OPTIONS = DEMO_STORIES.map((story, index) => ({
   index,
   label: `${story.emoji} ${story.merchant}`,
@@ -16,6 +18,12 @@ const DEMO_OPTIONS = DEMO_STORIES.map((story, index) => ({
 const LOADING_STEPS = ["Reading merchant", "Finding the moment", "Writing keepsake"];
 
 type Theme = "light" | "dark";
+
+type SavedMemory = {
+  id: string;
+  story: MemoryStory;
+  savedAt: string;
+};
 
 function formatStoryText(story: MemoryStory) {
   return `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
@@ -51,6 +59,29 @@ function storeTheme(theme: Theme) {
   }
 }
 
+function createStoryId(story: MemoryStory) {
+  return `${story.merchant}-${story.date}-${story.amount}-${story.storyLine}`;
+}
+
+function loadHistory(): SavedMemory[] {
+  try {
+    const stored = window.localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored) as SavedMemory[];
+    return Array.isArray(parsed) ? parsed.slice(0, HISTORY_LIMIT) : [];
+  } catch {
+    return [];
+  }
+}
+
+function storeHistory(history: SavedMemory[]) {
+  try {
+    window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch {
+    // Local history is an enhancement; generation still works if storage is unavailable.
+  }
+}
+
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const lastFileRef = useRef<File | null>(null);
@@ -65,6 +96,7 @@ export default function Home() {
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [loadingStep, setLoadingStep] = useState(0);
   const [fileDetails, setFileDetails] = useState<string | null>(null);
+  const [history, setHistory] = useState<SavedMemory[]>([]);
 
   useEffect(() => {
     if (!toast) return;
@@ -76,6 +108,7 @@ export default function Home() {
     const nextTheme = getStoredTheme();
     setTheme(nextTheme);
     applyTheme(nextTheme);
+    setHistory(loadHistory());
   }, []);
 
   useEffect(() => {
@@ -99,6 +132,24 @@ export default function Home() {
     }, 1200);
     return () => window.clearInterval(interval);
   }, [loading]);
+
+  useEffect(() => {
+    if (!story) return;
+
+    setHistory((current) => {
+      const savedMemory = {
+        id: createStoryId(story),
+        story,
+        savedAt: new Date().toISOString(),
+      };
+      const next = [savedMemory, ...current.filter((item) => item.id !== savedMemory.id)].slice(
+        0,
+        HISTORY_LIMIT,
+      );
+      storeHistory(next);
+      return next;
+    });
+  }, [story]);
 
   const toggleTheme = () => {
     setTheme((current) => {
