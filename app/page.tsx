@@ -107,12 +107,20 @@ export default function Home() {
     void processFile(file);
   };
 
-  const openFilePicker = () => inputRef.current?.click();
+  const resetFileInput = () => {
+    if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const openFilePicker = () => {
+    resetFileInput();
+    inputRef.current?.click();
+  };
 
   const chooseAnotherReceipt = () => {
     setError(null);
     setCopied(false);
     setStory(null);
+    resetFileInput();
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
