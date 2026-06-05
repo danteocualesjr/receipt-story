@@ -1,15 +1,47 @@
 "use client";
 
 import { MemoryCard } from "@/app/components/MemoryCard";
+import { DEMO_STORIES } from "@/lib/demo";
 import type { MemoryStory } from "@/lib/types";
-import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const THEME_STORAGE_KEY = "receipt-story-theme";
+const HISTORY_STORAGE_KEY = "receipt-story-history";
 const DEFAULT_THEME = "dark";
+const HISTORY_LIMIT = 5;
+const DEMO_OPTIONS = DEMO_STORIES.map((story, index) => ({
+  index,
+  label: `${story.emoji} ${story.merchant}`,
+}));
+const LOADING_STEPS = ["Reading merchant", "Finding the moment", "Writing keepsake"];
 
 type Theme = "light" | "dark";
+
+type SavedMemory = {
+  id: string;
+  story: MemoryStory;
+  savedAt: string;
+  favorite?: boolean;
+};
+
+function formatStoryText(story: MemoryStory) {
+  return `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatSavedAt(savedAt: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(savedAt));
+}
 
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
@@ -36,8 +68,40 @@ function storeTheme(theme: Theme) {
   }
 }
 
+function createStoryId(story: MemoryStory) {
+  return `${story.merchant}-${story.date}-${story.amount}-${story.storyLine}`;
+}
+
+function loadHistory(): SavedMemory[] {
+  try {
+    const stored = window.localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored) as SavedMemory[];
+    return Array.isArray(parsed) ? parsed.slice(0, HISTORY_LIMIT) : [];
+  } catch {
+    return [];
+  }
+}
+
+function storeHistory(history: SavedMemory[]) {
+  try {
+    window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  } catch {
+    // Local history is an enhancement; generation still works if storage is unavailable.
+  }
+}
+
+function orderHistory(history: SavedMemory[]) {
+  return [...history].sort((a, b) => {
+    if (Boolean(a.favorite) !== Boolean(b.favorite)) return a.favorite ? -1 : 1;
+    return new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime();
+  });
+}
+
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastFileRef = useRef<File | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [story, setStory] = useState<MemoryStory | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +110,10 @@ export default function Home() {
   const [toast, setToast] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [fileDetails, setFileDetails] = useState<string | null>(null);
+  const [history, setHistory] = useState<SavedMemory[]>([]);
+  const [canRetryUpload, setCanRetryUpload] = useState(false);
 
   useEffect(() => {
     if (!toast) return;
@@ -57,7 +125,50 @@ export default function Home() {
     const nextTheme = getStoredTheme();
     setTheme(nextTheme);
     applyTheme(nextTheme);
+    setHistory(loadHistory());
   }, []);
+
+  useEffect(() => {
+    previewUrlRef.current = previewUrl;
+  }, [previewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      setLoadingStep(0);
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setLoadingStep((current) => (current + 1) % LOADING_STEPS.length);
+    }, 1200);
+    return () => window.clearInterval(interval);
+  }, [loading]);
+
+  useEffect(() => {
+    if (!story) return;
+
+    setHistory((current) => {
+      const existing = current.find((item) => item.id === createStoryId(story));
+      const savedMemory = {
+        id: createStoryId(story),
+        story,
+        savedAt: new Date().toISOString(),
+        favorite: existing?.favorite ?? false,
+      };
+      const next = orderHistory([
+        savedMemory,
+        ...current.filter((item) => item.id !== savedMemory.id),
+      ]).slice(0, HISTORY_LIMIT);
+      storeHistory(next);
+      return next;
+    });
+  }, [story]);
 
   const toggleTheme = () => {
     setTheme((current) => {
@@ -71,7 +182,9 @@ export default function Home() {
   const processFile = useCallback(async (file: File) => {
     setError(null);
     setCopied(false);
+    setCanRetryUpload(true);
     setLoading(true);
+    setLoadingStep(0);
     setStory(null);
 
     const url = URL.createObjectURL(file);
@@ -97,22 +210,61 @@ export default function Home() {
   const onFile = (file: File | null) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
+      lastFileRef.current = null;
+      setCanRetryUpload(false);
       setError("Choose an image file, like a JPEG, PNG, or WebP receipt.");
       return;
     }
     if (file.size > MAX_IMAGE_BYTES) {
+      lastFileRef.current = null;
+      setCanRetryUpload(false);
       setError("Choose an image under 8 MB so it can be processed quickly.");
       return;
     }
+    lastFileRef.current = file;
+    setFileDetails(`${file.name || "Receipt image"} · ${formatFileSize(file.size)}`);
     void processFile(file);
   };
 
-  const openFilePicker = () => inputRef.current?.click();
+  useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      if (loading) return;
+      const image = Array.from(event.clipboardData?.files ?? []).find((file) =>
+        file.type.startsWith("image/"),
+      );
+      if (!image) return;
+
+      event.preventDefault();
+      setToast("Pasted receipt image");
+      onFile(image);
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [loading]);
+
+  const retryLastUpload = () => {
+    if (!lastFileRef.current || loading) return;
+    void processFile(lastFileRef.current);
+  };
+
+  const resetFileInput = () => {
+    if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const openFilePicker = () => {
+    resetFileInput();
+    inputRef.current?.click();
+  };
 
   const chooseAnotherReceipt = () => {
     setError(null);
     setCopied(false);
+    setCanRetryUpload(false);
     setStory(null);
+    setFileDetails(null);
+    lastFileRef.current = null;
+    resetFileInput();
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -120,19 +272,15 @@ export default function Home() {
     openFilePicker();
   };
 
-  const onDropzoneKeyDown = (e: KeyboardEvent<HTMLElement>) => {
-    if (e.target !== e.currentTarget || loading) return;
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      openFilePicker();
-    }
-  };
-
-  const tryDemo = async () => {
+  const tryDemo = async (demoIndex?: number) => {
     setError(null);
     setCopied(false);
+    setCanRetryUpload(false);
     setLoading(true);
+    setLoadingStep(0);
     setStory(null);
+    setFileDetails(null);
+    lastFileRef.current = null;
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -140,6 +288,7 @@ export default function Home() {
     try {
       const body = new FormData();
       body.append("demo", "true");
+      if (typeof demoIndex === "number") body.append("demoIndex", String(demoIndex));
       const res = await fetch("/api/story", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
@@ -151,14 +300,129 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    const handleShortcut = (event: globalThis.KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTyping =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+
+      if (loading || isTyping || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key.toLowerCase() === "u") {
+        event.preventDefault();
+        openFilePicker();
+      }
+      if (event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        void tryDemo();
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [loading]);
+
   const copyStory = async () => {
     if (!story) return;
-    const text = `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setToast("Story copied");
-    window.setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(formatStoryText(story));
+      setCopied(true);
+      setToast("Story copied");
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      setCanRetryUpload(false);
+      setError(e instanceof Error ? e.message : "Unable to copy this story.");
+    }
   };
+
+  const shareStory = async () => {
+    if (!story) return;
+    const text = formatStoryText(story);
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: "Receipt Story",
+          text,
+        });
+        setToast("Share sheet opened");
+        return;
+      }
+
+      await navigator.clipboard.writeText(text);
+      setToast("Story copied for sharing");
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
+      setCanRetryUpload(false);
+      setError(e instanceof Error ? e.message : "Unable to share this story.");
+    }
+  };
+
+  const downloadStory = () => {
+    if (!story) return;
+    const safeMerchant = story.merchant.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const fileName = `receipt-story-${safeMerchant || "memory"}.txt`;
+    const url = URL.createObjectURL(
+      new Blob([formatStoryText(story)], { type: "text/plain;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+    setToast("Story downloaded");
+  };
+
+  const restoreMemory = (memory: SavedMemory) => {
+    setError(null);
+    setCopied(false);
+    setFileDetails(null);
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setStory(memory.story);
+    setToast("Memory restored");
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    storeHistory([]);
+    setToast("Journal cleared");
+  };
+
+  const toggleCurrentFavorite = () => {
+    if (!story) return;
+    const storyId = createStoryId(story);
+    setHistory((current) => {
+      const currentMemory = current.find((item) => item.id === storyId);
+      const baseline = currentMemory
+        ? current
+        : [
+            {
+              id: storyId,
+              story,
+              savedAt: new Date().toISOString(),
+              favorite: false,
+            },
+            ...current,
+          ];
+      const next = orderHistory(
+        baseline.map((item) =>
+          item.id === storyId ? { ...item, favorite: !item.favorite } : item,
+        ),
+      ).slice(0, HISTORY_LIMIT);
+      const favorite = next.find((item) => item.id === storyId)?.favorite;
+      storeHistory(next);
+      setToast(favorite ? "Memory pinned" : "Memory unpinned");
+      return next;
+    });
+  };
+
+  const currentStoryFavorite = story
+    ? history.find((item) => item.id === createStoryId(story))?.favorite
+    : false;
+  const favoriteCount = history.filter((item) => item.favorite).length;
 
   const dropzoneClass = [
     "dropzone",
@@ -194,12 +458,12 @@ export default function Home() {
             Story draft
           </span>
           <span>
-            <strong>Camera-ready</strong>
-            Mobile upload
+            <strong>{history.length}</strong>
+            Saved locally
           </span>
           <span>
-            <strong>Demo-safe</strong>
-            Works offline
+            <strong>{favoriteCount}</strong>
+            Pinned memories
           </span>
         </div>
         <div className="steps">
@@ -220,11 +484,8 @@ export default function Home() {
 
       <section
         className={dropzoneClass}
-        role="group"
-        tabIndex={loading ? -1 : 0}
         aria-label="Upload a receipt photo"
         aria-disabled={loading}
-        onKeyDown={onDropzoneKeyDown}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -250,7 +511,9 @@ export default function Home() {
         <p className="dropzone__label">
           {loading ? "Reading your receipt…" : "Drop a receipt here, or choose a photo"}
         </p>
-        <p className="dropzone__support">JPEG, PNG, or WebP under 8 MB</p>
+        <p className="dropzone__support">
+          JPEG, PNG, or WebP under 8 MB · paste from clipboard supported
+        </p>
         <button
           type="button"
           className="btn btn--primary"
@@ -282,17 +545,51 @@ export default function Home() {
           </button>
           {" · no API key needed"}
         </p>
+        <div className="demo-options" aria-label="Demo story choices">
+          {DEMO_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.index}
+              className="demo-chip"
+              onClick={() => void tryDemo(option.index)}
+              disabled={loading}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
         <div className="dropzone__pills" aria-label="Upload notes">
           <span>No signup</span>
           <span>Camera upload</span>
+          <span>Paste image</span>
           <span>Demo fallback</span>
         </div>
+        {fileDetails ? (
+          <p className="file-details" aria-live="polite">
+            Selected: {fileDetails}
+          </p>
+        ) : null}
+        <p className="shortcut-hint">Shortcuts: press U to upload or D for demo</p>
+        <p className="privacy-note">
+          <span aria-hidden>🔒</span>
+          Photos are sent only to create this story and are not stored by the app.
+        </p>
       </section>
 
       {error ? (
-        <p className="alert" role="alert">
-          {error}
-        </p>
+        <div className="alert" role="alert">
+          <span>{error}</span>
+          {canRetryUpload && lastFileRef.current ? (
+            <button
+              type="button"
+              className="link-btn"
+              onClick={retryLastUpload}
+              disabled={loading}
+            >
+              Try again
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {loading && !story ? (
@@ -303,10 +600,16 @@ export default function Home() {
             <div className="skeleton-line skeleton-line--story" />
             <div className="skeleton-line skeleton-line--short" />
           </div>
-          <ol className="loading-steps" aria-hidden>
-            <li>Reading merchant</li>
-            <li>Finding the moment</li>
-            <li>Writing keepsake</li>
+          <ol className="loading-steps" aria-label="Story creation progress">
+            {LOADING_STEPS.map((step, index) => (
+              <li
+                key={step}
+                className={index === loadingStep ? "loading-steps__item--active" : undefined}
+                aria-current={index === loadingStep ? "step" : undefined}
+              >
+                {step}
+              </li>
+            ))}
           </ol>
         </div>
       ) : null}
@@ -332,6 +635,37 @@ export default function Home() {
             </button>
             <button
               type="button"
+              className="btn btn--ghost"
+              onClick={() => void shareStory()}
+            >
+              <span className="btn__icon" aria-hidden>
+                ⇪
+              </span>
+              Share
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={downloadStory}
+            >
+              <span className="btn__icon" aria-hidden>
+                ↓
+              </span>
+              Save text
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={toggleCurrentFavorite}
+              aria-pressed={Boolean(currentStoryFavorite)}
+            >
+              <span className="btn__icon" aria-hidden>
+                {currentStoryFavorite ? "★" : "☆"}
+              </span>
+              {currentStoryFavorite ? "Pinned" : "Pin"}
+            </button>
+            <button
+              type="button"
               className="btn btn--soft"
               onClick={chooseAnotherReceipt}
             >
@@ -340,6 +674,37 @@ export default function Home() {
               </span>
               Another receipt
             </button>
+          </div>
+        </section>
+      ) : null}
+
+      {history.length > 0 ? (
+        <section className="memory-journal" aria-label="Recent memory journal">
+          <div className="memory-journal__header">
+            <div>
+              <p className="eyebrow">Recent journal</p>
+              <h2>Saved in this browser</h2>
+            </div>
+            <div className="memory-journal__tools">
+              <span>{history.length}/{HISTORY_LIMIT}</span>
+              <button type="button" className="link-btn" onClick={clearHistory}>
+                Clear
+              </button>
+            </div>
+          </div>
+          <div className="memory-journal__list">
+            {history.map((memory) => (
+              <button
+                type="button"
+                className="memory-journal__item"
+                key={memory.id}
+                onClick={() => restoreMemory(memory)}
+              >
+                <span aria-hidden>{memory.story.emoji}</span>
+                <strong>{memory.story.merchant}</strong>
+                <small>{memory.favorite ? "★ " : ""}{formatSavedAt(memory.savedAt)}</small>
+              </button>
+            ))}
           </div>
         </section>
       ) : null}

@@ -38,6 +38,20 @@ export function MemoryCard({ story, previewUrl }: Props) {
             <p className="memory-card__merchant">{story.merchant}</p>
           </div>
         </div>
+        <dl className="memory-card__facts" aria-label="Receipt details">
+          <div>
+            <dt>Date</dt>
+            <dd>{story.date}</dd>
+          </div>
+          <div>
+            <dt>Amount</dt>
+            <dd>{story.amount}</dd>
+          </div>
+          <div>
+            <dt>Vibe</dt>
+            <dd>{story.category}</dd>
+          </div>
+        </dl>
         <p className="memory-card__story">{story.storyLine}</p>
         <footer className="memory-card__footer">
           <span>{story.date}</span>
