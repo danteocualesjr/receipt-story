@@ -216,6 +216,21 @@ export default function Home() {
     }
   };
 
+  const downloadStory = () => {
+    if (!story) return;
+    const safeMerchant = story.merchant.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const fileName = `receipt-story-${safeMerchant || "memory"}.txt`;
+    const url = URL.createObjectURL(
+      new Blob([formatStoryText(story)], { type: "text/plain;charset=utf-8" }),
+    );
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+    setToast("Story downloaded");
+  };
+
   const dropzoneClass = [
     "dropzone",
     dragOver ? "dropzone--active" : "",
@@ -408,6 +423,16 @@ export default function Home() {
                 ⇪
               </span>
               Share
+            </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={downloadStory}
+            >
+              <span className="btn__icon" aria-hidden>
+                ↓
+              </span>
+              Save text
             </button>
             <button
               type="button"
