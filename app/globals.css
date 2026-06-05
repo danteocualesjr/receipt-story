@@ -616,6 +616,41 @@ a {
   font-size: 1.05rem;
 }
 
+.memory-card__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0 0 1.1rem;
+}
+
+.memory-card__facts div {
+  padding: 0.55rem;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+}
+
+.memory-card__facts dt,
+.memory-card__facts dd {
+  margin: 0;
+}
+
+.memory-card__facts dt {
+  color: var(--accent);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.memory-card__facts dd {
+  margin-top: 0.18rem;
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .memory-card__story {
   margin: 0;
   font-family: var(--font-serif);
