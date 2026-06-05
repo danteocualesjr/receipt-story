@@ -35,6 +35,8 @@ export const DEMO_STORIES: MemoryStory[] = [
 
 export function getDemoStory(index?: number): MemoryStory {
   const fallbackIndex = Math.floor(Math.random() * DEMO_STORIES.length);
-  const safeIndex = Number.isInteger(index) ? index % DEMO_STORIES.length : fallbackIndex;
+  const requestedIndex =
+    typeof index === "number" && Number.isInteger(index) ? index : fallbackIndex;
+  const safeIndex = requestedIndex % DEMO_STORIES.length;
   return DEMO_STORIES[safeIndex < 0 ? safeIndex + DEMO_STORIES.length : safeIndex];
 }
