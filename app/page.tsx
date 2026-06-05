@@ -1,6 +1,7 @@
 "use client";
 
 import { MemoryCard } from "@/app/components/MemoryCard";
+import { DEMO_STORIES } from "@/lib/demo";
 import type { MemoryStory } from "@/lib/types";
 import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -8,6 +9,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const THEME_STORAGE_KEY = "receipt-story-theme";
 const DEFAULT_THEME = "dark";
+const DEMO_OPTIONS = DEMO_STORIES.map((story, index) => ({
+  index,
+  label: `${story.emoji} ${story.merchant}`,
+}));
 
 type Theme = "light" | "dark";
 
@@ -164,7 +169,7 @@ export default function Home() {
     }
   };
 
-  const tryDemo = async () => {
+  const tryDemo = async (demoIndex?: number) => {
     setError(null);
     setCopied(false);
     setLoading(true);
@@ -176,6 +181,7 @@ export default function Home() {
     try {
       const body = new FormData();
       body.append("demo", "true");
+      if (typeof demoIndex === "number") body.append("demoIndex", String(demoIndex));
       const res = await fetch("/api/story", { method: "POST", body });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Request failed");
@@ -355,6 +361,19 @@ export default function Home() {
           </button>
           {" · no API key needed"}
         </p>
+        <div className="demo-options" aria-label="Demo story choices">
+          {DEMO_OPTIONS.map((option) => (
+            <button
+              type="button"
+              key={option.index}
+              className="demo-chip"
+              onClick={() => void tryDemo(option.index)}
+              disabled={loading}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
         <div className="dropzone__pills" aria-label="Upload notes">
           <span>No signup</span>
           <span>Camera upload</span>
