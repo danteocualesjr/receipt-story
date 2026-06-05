@@ -34,6 +34,15 @@ function formatFileSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function formatSavedAt(savedAt: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(savedAt));
+}
+
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
@@ -324,6 +333,18 @@ export default function Home() {
     setToast("Story downloaded");
   };
 
+  const restoreMemory = (memory: SavedMemory) => {
+    setError(null);
+    setCopied(false);
+    setFileDetails(null);
+    setPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setStory(memory.story);
+    setToast("Memory restored");
+  };
+
   const dropzoneClass = [
     "dropzone",
     dragOver ? "dropzone--active" : "",
@@ -561,6 +582,32 @@ export default function Home() {
               </span>
               Another receipt
             </button>
+          </div>
+        </section>
+      ) : null}
+
+      {history.length > 0 ? (
+        <section className="memory-journal" aria-label="Recent memory journal">
+          <div className="memory-journal__header">
+            <div>
+              <p className="eyebrow">Recent journal</p>
+              <h2>Saved in this browser</h2>
+            </div>
+            <span>{history.length}/{HISTORY_LIMIT}</span>
+          </div>
+          <div className="memory-journal__list">
+            {history.map((memory) => (
+              <button
+                type="button"
+                className="memory-journal__item"
+                key={memory.id}
+                onClick={() => restoreMemory(memory)}
+              >
+                <span aria-hidden>{memory.story.emoji}</span>
+                <strong>{memory.story.merchant}</strong>
+                <small>{formatSavedAt(memory.savedAt)}</small>
+              </button>
+            ))}
           </div>
         </section>
       ) : null}
