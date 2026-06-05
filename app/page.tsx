@@ -38,6 +38,7 @@ function storeTheme(theme: Theme) {
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastFileRef = useRef<File | null>(null);
   const [story, setStory] = useState<MemoryStory | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -104,7 +105,13 @@ export default function Home() {
       setError("Choose an image under 8 MB so it can be processed quickly.");
       return;
     }
+    lastFileRef.current = file;
     void processFile(file);
+  };
+
+  const retryLastUpload = () => {
+    if (!lastFileRef.current || loading) return;
+    void processFile(lastFileRef.current);
   };
 
   const resetFileInput = () => {
@@ -298,9 +305,19 @@ export default function Home() {
       </section>
 
       {error ? (
-        <p className="alert" role="alert">
-          {error}
-        </p>
+        <div className="alert" role="alert">
+          <span>{error}</span>
+          {lastFileRef.current ? (
+            <button
+              type="button"
+              className="link-btn"
+              onClick={retryLastUpload}
+              disabled={loading}
+            >
+              Try again
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {loading && !story ? (
