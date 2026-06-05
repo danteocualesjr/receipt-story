@@ -403,6 +403,7 @@ export default function Home() {
   const currentStoryFavorite = story
     ? history.find((item) => item.id === createStoryId(story))?.favorite
     : false;
+  const favoriteCount = history.filter((item) => item.favorite).length;
 
   const dropzoneClass = [
     "dropzone",
@@ -438,12 +439,12 @@ export default function Home() {
             Story draft
           </span>
           <span>
-            <strong>Camera-ready</strong>
-            Mobile upload
+            <strong>{history.length}</strong>
+            Saved locally
           </span>
           <span>
-            <strong>Demo-safe</strong>
-            Works offline
+            <strong>{favoriteCount}</strong>
+            Pinned memories
           </span>
         </div>
         <div className="steps">
