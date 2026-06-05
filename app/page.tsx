@@ -23,6 +23,7 @@ type SavedMemory = {
   id: string;
   story: MemoryStory;
   savedAt: string;
+  favorite?: boolean;
 };
 
 function formatStoryText(story: MemoryStory) {
@@ -91,6 +92,13 @@ function storeHistory(history: SavedMemory[]) {
   }
 }
 
+function orderHistory(history: SavedMemory[]) {
+  return [...history].sort((a, b) => {
+    if (Boolean(a.favorite) !== Boolean(b.favorite)) return a.favorite ? -1 : 1;
+    return new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime();
+  });
+}
+
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const lastFileRef = useRef<File | null>(null);
@@ -146,15 +154,17 @@ export default function Home() {
     if (!story) return;
 
     setHistory((current) => {
+      const existing = current.find((item) => item.id === createStoryId(story));
       const savedMemory = {
         id: createStoryId(story),
         story,
         savedAt: new Date().toISOString(),
+        favorite: existing?.favorite ?? false,
       };
-      const next = [savedMemory, ...current.filter((item) => item.id !== savedMemory.id)].slice(
-        0,
-        HISTORY_LIMIT,
-      );
+      const next = orderHistory([
+        savedMemory,
+        ...current.filter((item) => item.id !== savedMemory.id),
+      ]).slice(0, HISTORY_LIMIT);
       storeHistory(next);
       return next;
     });
@@ -350,6 +360,26 @@ export default function Home() {
     storeHistory([]);
     setToast("Journal cleared");
   };
+
+  const toggleCurrentFavorite = () => {
+    if (!story) return;
+    const storyId = createStoryId(story);
+    setHistory((current) => {
+      const next = orderHistory(
+        current.map((item) =>
+          item.id === storyId ? { ...item, favorite: !item.favorite } : item,
+        ),
+      );
+      const favorite = next.find((item) => item.id === storyId)?.favorite;
+      storeHistory(next);
+      setToast(favorite ? "Memory pinned" : "Memory unpinned");
+      return next;
+    });
+  };
+
+  const currentStoryFavorite = story
+    ? history.find((item) => item.id === createStoryId(story))?.favorite
+    : false;
 
   const dropzoneClass = [
     "dropzone",
@@ -580,6 +610,17 @@ export default function Home() {
             </button>
             <button
               type="button"
+              className="btn btn--ghost"
+              onClick={toggleCurrentFavorite}
+              aria-pressed={Boolean(currentStoryFavorite)}
+            >
+              <span className="btn__icon" aria-hidden>
+                {currentStoryFavorite ? "★" : "☆"}
+              </span>
+              {currentStoryFavorite ? "Pinned" : "Pin"}
+            </button>
+            <button
+              type="button"
               className="btn btn--soft"
               onClick={chooseAnotherReceipt}
             >
@@ -616,7 +657,7 @@ export default function Home() {
               >
                 <span aria-hidden>{memory.story.emoji}</span>
                 <strong>{memory.story.merchant}</strong>
-                <small>{formatSavedAt(memory.savedAt)}</small>
+                <small>{memory.favorite ? "★ " : ""}{formatSavedAt(memory.savedAt)}</small>
               </button>
             ))}
           </div>
