@@ -447,6 +447,14 @@ a {
   font-weight: 700;
 }
 
+.file-details {
+  margin: 0.85rem auto 0;
+  max-width: 320px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
 /* Spinner */
 .spinner {
   width: 18px;

@@ -21,6 +21,11 @@ function formatStoryText(story: MemoryStory) {
   return `${story.emoji} ${story.storyLine}\n— ${story.merchant}, ${story.amount} · ${story.date}`;
 }
 
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
@@ -58,6 +63,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [loadingStep, setLoadingStep] = useState(0);
+  const [fileDetails, setFileDetails] = useState<string | null>(null);
 
   useEffect(() => {
     if (!toast) return;
@@ -130,6 +136,7 @@ export default function Home() {
       return;
     }
     lastFileRef.current = file;
+    setFileDetails(`${file.name || "Receipt image"} · ${formatFileSize(file.size)}`);
     void processFile(file);
   };
 
@@ -168,6 +175,7 @@ export default function Home() {
     setError(null);
     setCopied(false);
     setStory(null);
+    setFileDetails(null);
     resetFileInput();
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -190,6 +198,7 @@ export default function Home() {
     setLoading(true);
     setLoadingStep(0);
     setStory(null);
+    setFileDetails(null);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -396,6 +405,11 @@ export default function Home() {
           <span>Paste image</span>
           <span>Demo fallback</span>
         </div>
+        {fileDetails ? (
+          <p className="file-details" aria-live="polite">
+            Selected: {fileDetails}
+          </p>
+        ) : null}
       </section>
 
       {error ? (
