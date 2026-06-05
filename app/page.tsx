@@ -3,7 +3,7 @@
 import { MemoryCard } from "@/app/components/MemoryCard";
 import { DEMO_STORIES } from "@/lib/demo";
 import type { MemoryStory } from "@/lib/types";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -265,7 +265,7 @@ export default function Home() {
     openFilePicker();
   };
 
-  const onDropzoneKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+  const onDropzoneKeyDown = (e: ReactKeyboardEvent<HTMLElement>) => {
     if (e.target !== e.currentTarget || loading) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -298,6 +298,29 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const handleShortcut = (event: globalThis.KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const isTyping =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+
+      if (loading || isTyping || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key.toLowerCase() === "u") {
+        event.preventDefault();
+        openFilePicker();
+      }
+      if (event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        void tryDemo();
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, [loading]);
 
   const copyStory = async () => {
     if (!story) return;
@@ -529,6 +552,7 @@ export default function Home() {
             Selected: {fileDetails}
           </p>
         ) : null}
+        <p className="shortcut-hint">Shortcuts: press U to upload or D for demo</p>
       </section>
 
       {error ? (

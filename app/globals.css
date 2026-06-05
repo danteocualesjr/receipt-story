@@ -455,6 +455,12 @@ a {
   line-height: 1.4;
 }
 
+.shortcut-hint {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
 /* Spinner */
 .spinner {
   width: 18px;
