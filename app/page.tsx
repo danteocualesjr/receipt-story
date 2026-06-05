@@ -3,7 +3,6 @@
 import { MemoryCard } from "@/app/components/MemoryCard";
 import { DEMO_STORIES } from "@/lib/demo";
 import type { MemoryStory } from "@/lib/types";
-import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -114,6 +113,7 @@ export default function Home() {
   const [loadingStep, setLoadingStep] = useState(0);
   const [fileDetails, setFileDetails] = useState<string | null>(null);
   const [history, setHistory] = useState<SavedMemory[]>([]);
+  const [canRetryUpload, setCanRetryUpload] = useState(false);
 
   useEffect(() => {
     if (!toast) return;
@@ -182,6 +182,7 @@ export default function Home() {
   const processFile = useCallback(async (file: File) => {
     setError(null);
     setCopied(false);
+    setCanRetryUpload(true);
     setLoading(true);
     setLoadingStep(0);
     setStory(null);
@@ -209,10 +210,14 @@ export default function Home() {
   const onFile = (file: File | null) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
+      lastFileRef.current = null;
+      setCanRetryUpload(false);
       setError("Choose an image file, like a JPEG, PNG, or WebP receipt.");
       return;
     }
     if (file.size > MAX_IMAGE_BYTES) {
+      lastFileRef.current = null;
+      setCanRetryUpload(false);
       setError("Choose an image under 8 MB so it can be processed quickly.");
       return;
     }
@@ -255,8 +260,10 @@ export default function Home() {
   const chooseAnotherReceipt = () => {
     setError(null);
     setCopied(false);
+    setCanRetryUpload(false);
     setStory(null);
     setFileDetails(null);
+    lastFileRef.current = null;
     resetFileInput();
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -265,21 +272,15 @@ export default function Home() {
     openFilePicker();
   };
 
-  const onDropzoneKeyDown = (e: ReactKeyboardEvent<HTMLElement>) => {
-    if (e.target !== e.currentTarget || loading) return;
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      openFilePicker();
-    }
-  };
-
   const tryDemo = async (demoIndex?: number) => {
     setError(null);
     setCopied(false);
+    setCanRetryUpload(false);
     setLoading(true);
     setLoadingStep(0);
     setStory(null);
     setFileDetails(null);
+    lastFileRef.current = null;
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -324,10 +325,15 @@ export default function Home() {
 
   const copyStory = async () => {
     if (!story) return;
-    await navigator.clipboard.writeText(formatStoryText(story));
-    setCopied(true);
-    setToast("Story copied");
-    window.setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(formatStoryText(story));
+      setCopied(true);
+      setToast("Story copied");
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch (e) {
+      setCanRetryUpload(false);
+      setError(e instanceof Error ? e.message : "Unable to copy this story.");
+    }
   };
 
   const shareStory = async () => {
@@ -347,6 +353,7 @@ export default function Home() {
       setToast("Story copied for sharing");
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
+      setCanRetryUpload(false);
       setError(e instanceof Error ? e.message : "Unable to share this story.");
     }
   };
@@ -388,11 +395,23 @@ export default function Home() {
     if (!story) return;
     const storyId = createStoryId(story);
     setHistory((current) => {
+      const currentMemory = current.find((item) => item.id === storyId);
+      const baseline = currentMemory
+        ? current
+        : [
+            {
+              id: storyId,
+              story,
+              savedAt: new Date().toISOString(),
+              favorite: false,
+            },
+            ...current,
+          ];
       const next = orderHistory(
-        current.map((item) =>
+        baseline.map((item) =>
           item.id === storyId ? { ...item, favorite: !item.favorite } : item,
         ),
-      );
+      ).slice(0, HISTORY_LIMIT);
       const favorite = next.find((item) => item.id === storyId)?.favorite;
       storeHistory(next);
       setToast(favorite ? "Memory pinned" : "Memory unpinned");
@@ -465,11 +484,8 @@ export default function Home() {
 
       <section
         className={dropzoneClass}
-        role="group"
-        tabIndex={loading ? -1 : 0}
         aria-label="Upload a receipt photo"
         aria-disabled={loading}
-        onKeyDown={onDropzoneKeyDown}
         onDragOver={(e) => {
           e.preventDefault();
           setDragOver(true);
@@ -563,7 +579,7 @@ export default function Home() {
       {error ? (
         <div className="alert" role="alert">
           <span>{error}</span>
-          {lastFileRef.current ? (
+          {canRetryUpload && lastFileRef.current ? (
             <button
               type="button"
               className="link-btn"
