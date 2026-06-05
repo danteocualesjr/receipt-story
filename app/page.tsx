@@ -54,6 +54,7 @@ function storeTheme(theme: Theme) {
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const lastFileRef = useRef<File | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [story, setStory] = useState<MemoryStory | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -75,6 +76,16 @@ export default function Home() {
     const nextTheme = getStoredTheme();
     setTheme(nextTheme);
     applyTheme(nextTheme);
+  }, []);
+
+  useEffect(() => {
+    previewUrlRef.current = previewUrl;
+  }, [previewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    };
   }, []);
 
   useEffect(() => {
