@@ -1,4 +1,4 @@
-import { DEMO_STORY } from "@/lib/demo";
+import { getDemoStory } from "@/lib/demo";
 import { storyFromReceipt } from "@/lib/openai";
 import { NextResponse } from "next/server";
 
@@ -12,9 +12,12 @@ export async function POST(req: Request) {
     const form = await req.formData();
     const file = form.get("receipt");
     const forceDemo = form.get("demo") === "true";
+    const demoIndexValue = form.get("demoIndex");
+    const demoIndex =
+      typeof demoIndexValue === "string" ? Number.parseInt(demoIndexValue, 10) : undefined;
 
     if (forceDemo || !process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ ...DEMO_STORY, demo: true });
+      return NextResponse.json({ ...getDemoStory(demoIndex), demo: true });
     }
 
     if (!(file instanceof File)) {
