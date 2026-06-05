@@ -2,38 +2,43 @@
 
 ## Cursor Cloud specific instructions
 
-### Product overview
+### Product
 
-**Receipt → Story** is a single Next.js 15 (App Router) app. There is no separate backend, database, or Docker stack. All UI and API routes live in this repo.
+**Receipt → Story** — a Next.js 15 hackathon MVP. Users upload a receipt photo (or use demo mode) and get a one-line memory card. Demo mode works without any API key.
 
 ### Services
 
-| Service | Command | URL |
-|---------|---------|-----|
-| Next.js dev server | `npm run dev` | http://localhost:3000 |
+| Service | Port | Notes |
+|---------|------|-------|
+| Next.js dev server | 3000 | Single service; frontend + `/api/story` API route |
 
-Start the dev server in a tmux session if you need it to persist across commands.
+No Docker, database, or separate backend is required.
 
-### Standard commands
+### Common commands
 
-See `package.json` and `README.md` for the canonical commands:
+See `package.json` scripts and `README.md` for standard commands:
 
-- **Install deps:** `npm install`
-- **Dev server:** `npm run dev`
-- **Production build:** `npm run build` then `npm run start`
-- **Lint:** `npm run lint` — may prompt interactively on first run if ESLint is not configured; `npm run build` already runs type-checking and lint during build.
+- **Install:** `npm install`
+- **Dev:** `npm run dev` → http://localhost:3000
+- **Build:** `npm run build`
+- **Production:** `npm run start` (after build)
 
-### Environment variables
+### Lint
 
-Optional. Copy `.env.example` to `.env.local` and set `OPENAI_API_KEY` for real receipt uploads. Without it, use **Try demo story** on the home page or `POST /api/story` with `demo=true`.
+`npm run lint` opens an interactive ESLint setup wizard because the repo has no `.eslintrc` yet. Type-checking and lint run successfully as part of `npm run build`. Use `npm run build` to verify lint/types until ESLint is configured.
+
+### Tests
+
+No automated test suite is configured (`package.json` has no `test` script).
+
+### Optional: real receipt processing
+
+Copy `.env.example` to `.env.local` and set `OPENAI_API_KEY` for live vision AI. Without it, **Try demo story** and upload fallback still work.
 
 ### Hello-world verification
 
-1. `npm run dev` → open http://localhost:3000
-2. Click **Try demo story** — expect a "Midnight Ramen Co." memory card
-3. Or: `curl -X POST http://localhost:3000/api/story -F "demo=true"` — expect JSON with `"demo":true`
+1. Start `npm run dev`
+2. Open http://localhost:3000
+3. Click **Try demo story** — expect a memory card for "Midnight Ramen Co."
 
-### Gotchas
-
-- No automated test suite in this repo; verify via build + manual/API demo flow above.
-- Demo mode works without any API keys or external services.
+Or via API: `curl -s -X POST -F "demo=true" http://localhost:3000/api/story`
