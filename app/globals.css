@@ -757,6 +757,12 @@ a {
   text-align: center;
 }
 
+.loading-steps__item--active {
+  color: var(--accent) !important;
+  border-color: var(--accent-border) !important;
+  background: var(--accent-soft) !important;
+}
+
 .loading-steps li::after {
   content: "";
   position: absolute;

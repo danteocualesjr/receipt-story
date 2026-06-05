@@ -13,6 +13,7 @@ const DEMO_OPTIONS = DEMO_STORIES.map((story, index) => ({
   index,
   label: `${story.emoji} ${story.merchant}`,
 }));
+const LOADING_STEPS = ["Reading merchant", "Finding the moment", "Writing keepsake"];
 
 type Theme = "light" | "dark";
 
@@ -56,6 +57,7 @@ export default function Home() {
   const [toast, setToast] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+  const [loadingStep, setLoadingStep] = useState(0);
 
   useEffect(() => {
     if (!toast) return;
@@ -68,6 +70,18 @@ export default function Home() {
     setTheme(nextTheme);
     applyTheme(nextTheme);
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      setLoadingStep(0);
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setLoadingStep((current) => (current + 1) % LOADING_STEPS.length);
+    }, 1200);
+    return () => window.clearInterval(interval);
+  }, [loading]);
 
   const toggleTheme = () => {
     setTheme((current) => {
@@ -82,6 +96,7 @@ export default function Home() {
     setError(null);
     setCopied(false);
     setLoading(true);
+    setLoadingStep(0);
     setStory(null);
 
     const url = URL.createObjectURL(file);
@@ -173,6 +188,7 @@ export default function Home() {
     setError(null);
     setCopied(false);
     setLoading(true);
+    setLoadingStep(0);
     setStory(null);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -406,10 +422,16 @@ export default function Home() {
             <div className="skeleton-line skeleton-line--story" />
             <div className="skeleton-line skeleton-line--short" />
           </div>
-          <ol className="loading-steps" aria-hidden>
-            <li>Reading merchant</li>
-            <li>Finding the moment</li>
-            <li>Writing keepsake</li>
+          <ol className="loading-steps" aria-label="Story creation progress">
+            {LOADING_STEPS.map((step, index) => (
+              <li
+                key={step}
+                className={index === loadingStep ? "loading-steps__item--active" : undefined}
+                aria-current={index === loadingStep ? "step" : undefined}
+              >
+                {step}
+              </li>
+            ))}
           </ol>
         </div>
       ) : null}
